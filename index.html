@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Promises - What are they and why should I care?</title>
+
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+    <meta name="author" content="Hakim El Hattab">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/moon.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="solarized_dark.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <div class="slides">
+        <section>
+          <h1>Promises</h1>
+          <h2>What are they and why should I care?</h2>
+          <p>
+            <small>Created by André de Jager</small>
+          </p>
+          <aside class="notes">
+
+          </aside>
+        </section>
+
+        <section>
+          <section>
+            <h2>What?</h2>
+            <h3>What is a Promise?</h3>
+            <ul>
+              <li class="fragment">Promises contain a future value</li>
+              <li class="fragment">For asynchronous code</li>
+              <li class="fragment">Chainable and nestable</li>
+              <li class="fragment">Not a new idea, but a standard</li>
+            </ul>
+            <aside class="notes">
+              All parts that use async e.g. http requests, file system, database
+            </aside>
+          </section>
+          <section>
+            <p>Normal HTTP.request
+            <pre><code class="javascript">var request = require('http').request;
+var req = request('https://api.github.com/', console.dir);
+req.on('error', console.error);</code></pre>
+            </p>
+            <div class="fragment">
+            <p>Promise version</p>
+            <pre><code class="javascript">var request = require('request-promise');
+request('https://api.github.com/')
+  .then(console.dir, console.error);</code></pre>
+            </div>
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Why?</h2>
+            <h3>Why use Promises?</h3>
+            <ul>
+              <li class="fragment">Alternative to callback hell (pyramid of doom)</li>
+              <li class="fragment">Shallower, more readable code</li>
+              <li class="fragment">Easier error handling</li>
+              <li class="fragment">Forward compatible</li>
+            </ul>
+            <aside class="notes">
+              Works great with generators
+            </aside>
+          </section>
+          <section>
+            <h3>Callback hell</h3>
+            <pre><code class="javascript">var fs = require('fs');
+var dir = '/Users/andre.dejager/Coding/';
+fs.exists(dir, function (exists) {
+  if (!exists)
+    return;
+  fs.readdir(path, function (err, files) {
+    if (err)
+      return console.error(err);
+    files.forEach(function (file) {
+      fs.stat(dir + file, function (err, stats) {
+        if (err)
+          return console.error(err);
+        console.log(stats.size);
+      });
+    });
+  });
+});</code></pre>
+          </section>
+          <section>
+            <h3>Promise heaven</h3>
+            <pre><code class="javascript">var exists = require('./exists');
+var promisify = require('promisify-node');
+var fs = promisify('fs');
+var dir = '/Users/andre.dejager/Coding/';
+exists(dir)
+  .then(function (exist) {
+    if (!exist)
+      return;
+    return fs.readdir(dir);
+  })
+  .then(function (files) {
+    files.forEach(function(file) {
+      fs.stat(dir + file).then(function (stat) {
+        console.log(stat.size);
+      }, console.error);
+    });
+  })
+  .catch(console.error);</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>How?</h2>
+            <h3>How do I use Promises?</h3>
+            <ul>
+              <li class="fragment">One constructor</li>
+              <li class="fragment">Call appropriate function (resolve or reject)</li>
+            </ul>
+            <pre class="fragment"><code class="javascript">var fs = require('fs');
+module.exports = function (path) {
+  return new Promise(function(resolve, reject) {
+    fs.exists(path, resolve);
+  });
+};</code></pre>
+          </section>
+          <section>
+          <pre><code class="javascript">var fs = promisify('fs');
+module.exports = function readdir(dir) {
+  return new Promise(function (resolve, reject) {
+    fs.readdir(dir, function (err, files) {
+       if (err)
+         return reject(err);
+      resolve(files);
+    });
+  });
+};</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>When?</h2>
+            <h3>When can I use Promises?</h3>
+            <ul>
+              <li class="fragment">Part of ES6 (ECMAScript 2015)</li>
+              <li class="fragment">Already in V8 (Chrome, iojs)</li>
+              <li class="fragment">Can be pollyfilled!</li>
+              <li class="fragment">Client and server side (Node.js)</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>Links</h2>
+          <ul>
+            <li>
+              <a href="https://docs.google.com/presentation/d/1Rg505XBSeKxY7Fcul1HHP6tdIPz1omxwxg2gHGwn-FQ/pub">ES6 Promises</a><br>
+
+            </li>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">MDN Promise</a><br>
+              The Mozilla Developer Network
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: false,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'reveal.js/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
